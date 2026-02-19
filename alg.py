@@ -1,37 +1,32 @@
 import math
 
-print("ВВЕДИТЕ ФУНКЦИЮ ОТ x")
-print("Например: x*log10(x+1)-1")
-print("Доступно: sin, cos, tan, log, log10, exp, sqrt, abs, pi, e")
-func_str = input("f(x) = ")
-
-print("ВВЕДИТЕ КОНЦЫ ПРОМЕЖУТКА")
-a = float(input())
-b = float(input())
-
-print("ВВЕДИТЕ ТОЧНОСТЬ")
-e = float(input())
-
 def f(x):
-    return eval(func_str, {
-        "x": x,
-        "sin": math.sin,
-        "cos": math.cos,
-        "tan": math.tan,
-        "log": math.log,
-        "log10": math.log10,
-        "exp": math.exp,
-        "sqrt": math.sqrt,
-        "abs": abs,
-        "pi": math.pi,
-        "e": math.e
-    })
 
-while b - a > 2 * e:
+    return x * math.log10(x + 1) - 1
+
+
+a = 2.0
+b = 3.0
+eps = 0.005
+
+print("Задание 1: Метод деления отрезка пополам")
+print(f"{'Шаг (i)':<8} | {'Левый (a)':<10} | {'Правый (b)':<10} | {'Корень (c)':<12} | {'В функции f(c)':<15}")
+print("-" * 65)
+
+step = 0
+
+while (b - a) > 2 * eps:
     c = (a + b) / 2
-    if f(a) * f(c) > 0:
-        a = c
-    else:
-        b = c
+    print(f"{step:<8} | {a:<10.5f} | {b:<10.5f} | {c:<12.5f} | {f(c):<15.5f}")
 
-print(f"ЗНАЧЕНИЕ КОРНЯ С ТОЧНОСТЬЮ {e} РАВНО {(a + b) / 2}")
+    # Если знаки функции на конце 'a' и в середине 'c' совпадают
+    if f(a) * f(c) > 0:
+        a = c  # Корень в правой половине, сдвигаем левую границу
+    else:
+        b = c  # Корень в левой половине, сдвигаем правую границу
+    step += 1
+
+# Вывод результата
+c = (a + b) / 2
+print(f"{step:<8} | {a:<10.5f} | {b:<10.5f} | {c:<12.5f} | {f(c):<15.5f}")
+print(f"\nИтоговый корень с точностью {eps}: {c:.3f}")

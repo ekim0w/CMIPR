@@ -1,0 +1,54 @@
+from __future__ import annotations
+
+
+DEFAULT_POINTS: list[tuple[float, float]] = [
+    (0.21, 0.06),
+    (2.46, -5.21),
+    (2.59, -6.99),
+    (3.00, -9.19),
+    (3.73, -11.21),
+    (4.44, -15.82),
+    (4.46, -13.06),
+    (4.75, -16.10),
+    (5.89, -21.45),
+]
+
+
+def least_squares_line(points: list[tuple[float, float]]) -> tuple[float, float]:
+    if len(points) < 2:
+        raise ValueError("Для линейного МНК нужно минимум две точки.")
+
+    n = len(points)
+    sum_x = sum(x for x, _ in points)
+    sum_y = sum(y for _, y in points)
+    sum_xx = sum(x * x for x, _ in points)
+    sum_xy = sum(x * y for x, y in points)
+
+    denominator = n * sum_xx - sum_x * sum_x
+    if denominator == 0:
+        raise ValueError("Невозможно построить прямую: все x одинаковы.")
+
+    a = (n * sum_xy - sum_x * sum_y) / denominator
+    b = (sum_xx * sum_y - sum_x * sum_xy) / denominator
+    return a, b
+
+
+def squared_error(points: list[tuple[float, float]], a: float, b: float) -> float:
+    return sum((a * x + b - y) ** 2 for x, y in points)
+
+
+def main() -> None:
+    a, b = least_squares_line(DEFAULT_POINTS)
+    error = squared_error(DEFAULT_POINTS, a, b)
+
+    print("Исходные точки:")
+    for x, y in DEFAULT_POINTS:
+        print(f"x = {x:.2f}, y = {y:.2f}")
+
+    print("\nЛинейная аппроксимация методом наименьших квадратов:")
+    print(f"y = {a:.6f}x + {b:.6f}")
+    print(f"Сумма квадратов отклонений: {error:.6f}")
+
+
+if __name__ == "__main__":
+    main()

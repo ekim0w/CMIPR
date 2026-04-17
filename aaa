@@ -1,0 +1,91 @@
+import math
+
+# =========================
+# УРАВНЕНИЕ
+# =========================
+def f(x, y):
+    return x * math.exp(-y)
+
+# =========================
+# ЭЙЛЕР (эталон в твоей проверке)
+# =========================
+def euler(x0, y0, h, n):
+    x, y = x0, y0
+    res = [(x, y)]
+    for _ in range(n):
+        y = y + h * f(x, y)
+        x = x + h
+        res.append((x, y))
+    return res
+
+# =========================
+# МОДИФИЦИРОВАННЫЙ ЭЙЛЕР (Хойна)
+# =========================
+def improved_euler(x0, y0, h, n):
+    x, y = x0, y0
+    res = [(x, y)]
+
+    for _ in range(n):
+        k1 = f(x, y)
+        y_predict = y + h * k1
+        k2 = f(x + h, y_predict)
+
+        y = y + h * (k1 + k2) / 2
+        x = x + h
+        res.append((x, y))
+
+    return res
+
+# =========================
+# РУНГЕ-КУТТА 4
+# =========================
+def runge_kutta(x0, y0, h, n):
+    x, y = x0, y0
+    res = [(x, y)]
+
+    for _ in range(n):
+        k1 = f(x, y)
+        k2 = f(x + h/2, y + h*k1/2)
+        k3 = f(x + h/2, y + h*k2/2)
+        k4 = f(x + h, y + h*k3)
+
+        y = y + h * (k1 + 2*k2 + 2*k3 + k4) / 6
+        x = x + h
+        res.append((x, y))
+
+    return res
+
+# =========================
+# ТАБЛИЦА
+# =========================
+def print_table(x0, y0, h, n):
+    e = euler(x0, y0, h, n)
+    ie = improved_euler(x0, y0, h, n)
+    rk = runge_kutta(x0, y0, h, n)
+
+    print("\ny' = x * e^(-y), y(0)=1")
+    print("-" * 95)
+    print(f"{'x':<6} | {'Эйлер':<18} | {'Мод.Эйлер':<18} | {'Рунге-Кутта':<18}")
+    print("-" * 95)
+
+    for i in range(n + 1):
+        x = e[i][0]
+        print(f"{x:<6.2f} | "
+              f"{e[i][1]:<18.8f} | "
+              f"{ie[i][1]:<18.8f} | "
+              f"{rk[i][1]:<18.8f}")
+
+# =========================
+# MAIN
+# =========================
+def main():
+    x0 = 0
+    y0 = 1
+
+    n = 10
+    h = 0.2
+
+    print_table(x0, y0, h, n)
+
+if __name__ == "__main__":
+    main()

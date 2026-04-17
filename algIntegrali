@@ -1,0 +1,106 @@
+import math
+import random
+
+# =========================
+# ФУНКЦИЯ
+# =========================
+def f(x):
+    return math.sqrt(3 - x**2)
+
+# =========================
+# ТОЧНОЕ ЗНАЧЕНИЕ
+# =========================
+def exact_integral(a, b):
+    def F(x):
+        return 0.5 * (x * math.sqrt(3 - x**2) + 3 * math.asin(x / math.sqrt(3)))
+    return F(b) - F(a)
+
+# =========================
+# МЕТОД ПРЯМОУГОЛЬНИКОВ
+# =========================
+def rectangles(a, b, n):
+    h = (b - a) / n
+    s = 0
+    for i in range(n):
+        x = a + (i + 0.5) * h
+        s += f(x)
+    return s * h
+
+# =========================
+# МЕТОД ТРАПЕЦИЙ
+# =========================
+def trapezoids(a, b, n):
+    h = (b - a) / n
+    s = (f(a) + f(b)) / 2
+    for i in range(1, n):
+        s += f(a + i * h)
+    return s * h
+
+# =========================
+# МЕТОД СИМПСОНА
+# =========================
+def simpson(a, b, n):
+    if n % 2 != 0:
+        n += 1
+    h = (b - a) / n
+    s = f(a) + f(b)
+
+    for i in range(1, n):
+        x = a + i * h
+        if i % 2 == 0:
+            s += 2 * f(x)
+        else:
+            s += 4 * f(x)
+
+    return s * h / 3
+
+# =========================
+# МОНТЕ-КАРЛО
+# =========================
+def monte_carlo(a, b, n):
+    s = 0
+    for _ in range(n):
+        x = random.uniform(a, b)
+        s += f(x)
+    return (b - a) * s / n
+
+# =========================
+# ТАБЛИЦА
+# =========================
+def print_table(a, b, n_values):
+    exact = exact_integral(a, b)
+
+    print("\nИнтеграл ∫ sqrt(3 - x^2) dx от", a, "до", b)
+    print("-" * 95)
+    print(f"{'n':<6} | {'Прямоуг.':<15} | {'Трапеции':<15} | {'Симпсон':<15} | {'Монте-Карло':<15}")
+    print("-" * 95)
+
+    for n in n_values:
+        r = rectangles(a, b, n)
+        t = trapezoids(a, b, n)
+        s = simpson(a, b, n)
+        m = monte_carlo(a, b, n)
+
+        print(f"{n:<6} | "
+              f"{r:.6f} ({abs(r - exact):.6f}) | "
+              f"{t:.6f} ({abs(t - exact):.6f}) | "
+              f"{s:.6f} ({abs(s - exact):.6f}) | "
+              f"{m:.6f} ({abs(m - exact):.6f})")
+
+    print("-" * 95)
+    print(f"Точное значение: {exact:.10f}")
+
+# =========================
+# MAIN
+# =========================
+def main():
+    a = 0.4
+    b = 1.2
+
+    # набор n для таблицы
+    n_values = [10, 50, 100, 500, 1000]
+
+    print_table(a, b, n_values)
+
+if __name__ == "__main__":
+    main()

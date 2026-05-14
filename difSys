@@ -1,0 +1,128 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import re
+
+# ================================
+# ПАРСЕР МАТЕМАТИЧЕСКИХ ВЫРАЖЕНИЙ
+# ================================
+
+def convert(expr):
+    expr = expr.lower()
+
+    # убираем пробелы
+    expr = expr.replace(" ", "")
+
+    # убираем "y1'=" или "y1' ="
+    expr = re.sub(r"y\d+'\s*=", "", expr)
+
+    # заменяем переменные
+    expr = re.sub(r"y1", "y[0]", expr)
+    expr = re.sub(r"y2", "y[1]", expr)
+    expr = re.sub(r"y3", "y[2]", expr)
+    expr = re.sub(r"y4", "y[3]", expr)
+
+    # мат. функции
+    expr = expr.replace("^", "**")
+    expr = expr.replace("sin", "np.sin")
+    expr = expr.replace("cos", "np.cos")
+    expr = expr.replace("exp", "np.exp")
+    expr = expr.replace("ln", "np.log")
+
+    return expr
+
+
+# ================================
+# ВВОД
+# ================================
+
+method = int(input("Метод (1 - Эйлер, 4 - Рунге-Кутта 4): "))
+n = int(input("Размер системы: "))
+
+print("\nВводи уравнения в виде: y1' = ..., y2' = ...\n")
+
+f_list = []
+
+for i in range(n):
+    expr = input(f"y{i+1}' = ")
+    f_list.append(convert(expr))
+
+
+# ================================
+# СИСТЕМА
+# ================================
+
+def f(x, y):
+    return np.array([
+        eval(expr, {"np": np}, {"x": x, "y": y})
+        for expr in f_list
+    ])
+
+
+# ================================
+# ЭЙЛЕР
+# ================================
+
+def euler(f, x, y, h):
+    return y + h * f(x, y)
+
+
+# ================================
+# РУНГЕ-КУТТА 4
+# ================================
+
+def rk4(f, x, y, h):
+    k1 = h * f(x, y)
+    k2 = h * f(x + h/2, y + k1/2)
+    k3 = h * f(x + h/2, y + k2/2)
+    k4 = h * f(x + h, y + k3)
+
+    return y + (k1 + 2*k2 + 2*k3 + k4) / 6
+
+
+# ================================
+# НАЧАЛЬНЫЕ ДАННЫЕ
+# ================================
+
+x0 = float(input("\nx0 = "))
+h = float(input("h = "))
+steps = int(input("Количество шагов = "))
+
+y0 = []
+for i in range(n):
+    y0.append(float(input(f"y{i+1}(0) = ")))
+
+y = np.array(y0, dtype=float)
+x = x0
+
+# ================================
+# РЕШЕНИЕ
+# ================================
+
+X = [x]
+Y = [y.copy()]
+
+for _ in range(steps):
+
+    if method == 1:
+        y = euler(f, x, y, h)
+    else:
+        y = rk4(f, x, y, h)
+
+    x += h
+    X.append(x)
+    Y.append(y.copy())
+
+X = np.array(X)
+Y = np.array(Y)
+
+# ================================
+# ТАБЛИЦА
+# ================================
+
+print("\nРЕЗУЛЬТАТ:\n")
+
+print("x\t" + "\t".join([f"y{i+1}" for i in range(n)]))
+
+for i in range(len(X)):
+    print(f"{X[i]:.4f}\t" + "\t".join(f"{Y[i][j]:.6f}" for j in range(n)))
+
